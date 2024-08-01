@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import drawpolygon as dp
 
 def furthestPoint(shape, d):
     furthest_point = None
@@ -13,26 +14,39 @@ def furthestPoint(shape, d):
        
     
 def GJK(s1, s2):
+    visited = set()
     d = np.array([1, 0, 0])
     simplex = [support(s1, s2, d)]
-    d = np.array([0 - simplex[0][0], 0 - simplex[0][1], 0 - simplex[0][2]])  # Fix: Convert d to a numpy array with the same dimension as the points
+    visited.add(tuple(simplex[0]))  # Fix: Convert simplex[0] to a tuple before adding it to the visited set
     while True:
         A = support(s1, s2, d)
+        if len(simplex) == 3 and tuple(simplex[-1]) in visited:
+            
+            print("No collision")
+            return False
+        visited.add(tuple(A))
+        
         if np.dot(A, d) < 0:
+            print("No collision")
             return False
         simplex.append(A)
-        if doSimplex(simplex, d):
+        if doSimplex(visited, simplex, d):
+            print("Collision")
+            print(visited)
             return True
         
     
          
 def support(s1, s2, d):
-    return furthestPoint(s1, d) - furthestPoint(s2, d)
+    return furthestPoint(s1, d) - furthestPoint(s2, -d)
 
-def doSimplex(simplex, d):
+def doSimplex(visited, simplex, d):
     if len(simplex) == 2:
+        print("Line case")
         return lineCase(simplex, d)
-    return triangleCase(simplex, d)
+    print("Triangle case")
+    print(simplex)
+    return triangleCase(visited, simplex, d)
 
 def lineCase(simplex, d):
     B, A = simplex
@@ -41,7 +55,7 @@ def lineCase(simplex, d):
     d = ABperp
     return False
 
-def triangleCase(simplex, d):
+def triangleCase(visited, simplex, d):
     C, B, A = simplex
     AB, AC, AO = B - A, C - A, 0 - A
     ABperp = tripleProduct(AC, AB, AB)
@@ -61,8 +75,9 @@ def tripleProduct(a, b, c):
 
 def main():
     s1 = np.array([(0, 0, 0), (0, 1, 0), (1, 1, 0), (1, 0, 0)])
-    s2 = np.array([(2, 2, 0), (2, 3, 0), (3, 3, 0), (3, 2, 0)])
+    s2 = np.array([(1.1, 0, 0), (2, 2, 0), (3, 2, 0), (3, 0, 0)])
     print(GJK(s1, s2))
+    dp.DrawPolygons([s1, s2])
 
 
 if __name__ == "__main__":
