@@ -1,7 +1,8 @@
 import numpy as np
 import math
 import drawpolygon as dp
-
+import renderpoints as rp
+import drawquadrilateral as dq
 def furthestPoint(shape, d):
     furthest_point = None
     max_distance = float('-inf')
@@ -11,7 +12,6 @@ def furthestPoint(shape, d):
             max_distance = distance
             furthest_point = point
     return furthest_point
-       
     
 def GJK(s1, s2):
     visited = set()
@@ -21,11 +21,9 @@ def GJK(s1, s2):
     while True:
         A = support(s1, s2, d)
         if len(simplex) == 3 and tuple(simplex[-1]) in visited:
-            
             print("No collision")
             return False
         visited.add(tuple(A))
-        
         if np.dot(A, d) < 0:
             print("No collision")
             return False
@@ -35,8 +33,6 @@ def GJK(s1, s2):
             print(visited)
             return True
         
-    
-         
 def support(s1, s2, d):
     return furthestPoint(s1, d) - furthestPoint(s2, -d)
 
@@ -74,10 +70,13 @@ def tripleProduct(a, b, c):
     return np.cross(np.cross(a, b), c)
 
 def main():
-    s1 = np.array([(0, 0, 0), (0, 1, 0), (1, 1, 0), (1, 0, 0)])
-    s2 = np.array([(1.1, 0, 0), (2, 2, 0), (3, 2, 0), (3, 0, 0)])
-    print(GJK(s1, s2))
-    dp.DrawPolygons([s1, s2])
+    s1 = ([(0, 0, 0), (0, 100, 0), (100, 100, 0), (100, 0, 0)])
+    s2 = ([(200, 0, 0), (200, 100, 0), (300, 100, 0), (300, 0, 0)])
+    print(GJK(np.array(s1), np.array(s2)))
+    points = dq.drawPolygon(s1)
+    points.extend(dq.drawPolygon(s2))
+    
+    rp.render_points(points)
 
 
 if __name__ == "__main__":
